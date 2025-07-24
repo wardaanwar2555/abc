@@ -6,6 +6,7 @@ It allows you to create, update, and delete tasks, helping you stay organized an
 ---
 
 ![App Screenshot](static/screenshot.png)
+[Screenshot%202025-07-24%20164829.jpg]
 
 > 🖼️ *Add your app screenshot above by placing an image named `screenshot.png` in the `static/` folder.*
 
