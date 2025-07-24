@@ -33,4 +33,22 @@ It allows you to create, update, and delete tasks, helping you stay organized an
 ---
 
 ## 🧱 Project Structure
-
+Flask-Todo-App/
+│
+├── app.py # Main Flask application
+├── pyvenv.cfg # Python virtual environment config
+├── .gitignore
+├── readme.md # This file
+├── Screenshot*.jpg # App screenshots
+│
+├── instance/
+│ └── todo.db # SQLite database file
+│
+├── templates/
+│ ├── base.html # Base HTML template
+│ ├── index.html # Task list view
+│ └── update.html # Task edit form
+│
+├── Lib/ # Python environment libraries
+├── Scripts/ # Scripts for virtual env
+└── pycache/ # Python bytecode cache
