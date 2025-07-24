@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %} Home {% endblock title %}
+{% block body %}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary">📝 Todo App</h2>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-dark me-2" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+            <div class="input-group" style="width: 300px;">
+                <input type="text" class="form-control" id="searchInput" onkeyup="filterTodos()" placeholder="Search todos...">
+                <button class="btn btn-outline-primary" type="button" onclick="searchTodos()">
+                    🔍 Search
+                </button>
+                <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                    ✖️ Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-light p-4 rounded shadow">
+        <h4 class="text-center text-primary">Add a Todo</h4>
+        <form action="/" method="POST">
+            <div class="mb-3">
+                <label for="title" class="form-label fw-bold">Todo Title</label>
+                <input type="text" class="form-control border-primary" name="title" id="title" placeholder="Enter title" required>
+            </div>
+            <div class="mb-3">
+                <label for="desc" class="form-label fw-bold">Todo Description</label>
+                <textarea class="form-control border-primary" name="desc" id="desc" rows="3" placeholder="Enter description" required></textarea>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary px-5">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container my-4">
+    <div class="bg-light p-4 rounded shadow">
+        <h4 class="text-center text-success">Your Todos</h4>
+        
+        <!-- Search Results Info -->
+        <div id="searchInfo" class="alert alert-info text-center" style="display: none;">
+            <span id="searchResultText"></span>
+        </div>
+
+        {% if allTodo|length == 0 %}
+        <div class="alert alert-warning text-center" role="alert">
+            No Todos found. Add your first todo now!
+        </div>
+        {% else %}
+        <table class="table table-bordered table-hover" id="todoTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>SNo</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for todo in allTodo %}
+                <tr class="todo-row">
+                    <td>{{ loop.index }}</td>
+                    <td class="todo-title">{{ todo.title }}</td>
+                    <td class="todo-desc">{{ todo.desc }}</td>
+                    <td>{{ todo.date_created.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td>
+                        <a href="/update/{{ todo.sno }}" class="btn btn-outline-success btn-sm mx-1">Update</a>
+                        <a href="/delete/{{ todo.sno }}" class="btn btn-outline-danger btn-sm mx-1">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+        document.body.classList.toggle("bg-dark");
+        document.body.classList.toggle("text-light");
+
+        const cards = document.querySelectorAll(".bg-light");
+        cards.forEach(card => {
+            card.classList.toggle("bg-dark");
+            card.classList.toggle("text-light");
+            card.classList.toggle("border-light");
+        });
+
+        const table = document.querySelector(".table");
+        if (table) {
+            table.classList.toggle("table-dark");
+        }
+
+        const searchInfo = document.getElementById("searchInfo");
+        if (searchInfo.style.display !== "none") {
+            searchInfo.classList.toggle("alert-info");
+            searchInfo.classList.toggle("alert-light");
+        }
+    }
+
+    // Real-time Search Filter Function (triggered on keyup)
+    function filterTodos() {
+        performSearch();
+    }
+
+    // Search Button Function
+    function searchTodos() {
+        performSearch();
+        showSearchInfo();
+    }
+
+    // Core search functionality
+    function performSearch() {
+        const input = document.getElementById("searchInput").value.trim().toLowerCase();
+        const rows = document.querySelectorAll("#todoTable .todo-row");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const title = row.querySelector(".todo-title")?.textContent.trim().toLowerCase() || "";
+            const desc = row.querySelector(".todo-desc")?.textContent.trim().toLowerCase() || "";
+
+            if (input === "" || title.includes(input) || desc.includes(input)) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        return { total: rows.length, visible: visibleCount, searchTerm: input };
+    }
+
+    // Show search information
+    function showSearchInfo() {
+        const searchResult = performSearch();
+        const searchInfo = document.getElementById("searchInfo");
+        const searchResultText = document.getElementById("searchResultText");
+
+        if (searchResult.searchTerm === "") {
+            searchInfo.style.display = "none";
+        } else {
+            if (searchResult.visible === 0) {
+                searchResultText.textContent = `No todos found for "${searchResult.searchTerm}"`;
+                searchInfo.className = "alert alert-warning text-center";
+            } else {
+                searchResultText.textContent = `Found ${searchResult.visible} todo(s) matching "${searchResult.searchTerm}"`;
+                searchInfo.className = "alert alert-info text-center";
+            }
+            searchInfo.style.display = "block";
+        }
+    }
+
+    // Clear search function
+    function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        const rows = document.querySelectorAll("#todoTable .todo-row");
+        rows.forEach(row => {
+            row.style.display = "";
+        });
+        document.getElementById("searchInfo").style.display = "none";
+    }
+
+    // Allow Enter key to trigger search
+    document.getElementById("searchInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            searchTodos();
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+{% endblock body %}
